@@ -8,7 +8,7 @@ const getRoleId = async (roleName) => {
 }
 
 const findAllStudents = async (payload) => {
-    const { name, className, section, roll } = payload;
+    const { name, className, section, roll } = payload || {};
     let query = `
         SELECT
             t1.id,
@@ -20,27 +20,33 @@ const findAllStudents = async (payload) => {
         LEFT JOIN user_profiles t3 ON t1.id = t3.user_id
         WHERE t1.role_id = 3`;
     let queryParams = [];
+    
     if (name) {
-        query += ` AND t1.name = $${queryParams.length + 1}`;
-        queryParams.push(name);
+        query += ` AND t1.name ILIKE $${queryParams.length + 1}`;
+        queryParams.push(`%${name}%`);
     }
     if (className) {
-        query += ` AND t3.class_name = $${queryParams.length + 1}`;
-        queryParams.push(className);
+        query += ` AND t3.class_name ILIKE $${queryParams.length + 1}`;
+        queryParams.push(`%${className}%`);
     }
     if (section) {
-        query += ` AND t3.section_name = $${queryParams.length + 1}`;
-        queryParams.push(section);
+        query += ` AND t3.section_name ILIKE $${queryParams.length + 1}`;
+        queryParams.push(`%${section}%`);
     }
     if (roll) {
         query += ` AND t3.roll = $${queryParams.length + 1}`;
         queryParams.push(roll);
     }
 
-    query += ' ORDER BY t1.id';
+    query += ' ORDER BY t1.name, t1.id';
 
-    const { rows } = await processDBRequest({ query, queryParams });
-    return rows;
+    try {
+        const { rows } = await processDBRequest({ query, queryParams });
+        return rows;
+    } catch (error) {
+        console.error('Error fetching students:', error);
+        throw new Error('Failed to fetch students from database');
+    }
 }
 
 const addOrUpdateStudent = async (payload) => {
@@ -111,11 +117,37 @@ const findStudentToUpdate = async (paylaod) => {
     return rows;
 }
 
+const deleteStudent = async (id) => {
+    
+    // check if student exists
+    const checkQuery = "SELECT id FROM users WHERE id = $1 AND role_id = 3";
+    const checkParams = [id];
+    const { rows } = await processDBRequest({ query: checkQuery, queryParams: checkParams });
+    
+    if (rows.length === 0) {
+        throw new Error("Student not found");
+    }
+
+    // Delete from user_profiles first 
+    const deleteProfileQuery = "DELETE FROM user_profiles WHERE user_id = $1";
+    const deleteProfileParams = [id];
+    await processDBRequest({ query: deleteProfileQuery, queryParams: deleteProfileParams });
+
+    // Delete from users table ( due to foreign key constraint )
+    // TODO: Cascade delete from users table? 
+    const deleteUserQuery = "DELETE FROM users WHERE id = $1 AND role_id = 3";
+    const deleteUserParams = [id];
+    const { rowCount } = await processDBRequest({ query: deleteUserQuery, queryParams: deleteUserParams });
+    
+    return rowCount;
+}
+
 module.exports = {
     getRoleId,
     findAllStudents,
     addOrUpdateStudent,
     findStudentDetail,
     findStudentToSetStatus,
-    findStudentToUpdate
+    findStudentToUpdate,
+    deleteStudent
 };
