@@ -1,0 +1,8 @@
+node_modules
+hashPwd.js
+
+# Environment files
+.env
+*.env
+**/.env
+**/*.env
