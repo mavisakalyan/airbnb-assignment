@@ -136,15 +136,40 @@ VALUES
 ('Get role detail', '/api/v1/roles/:id', NULL, 'access_setting_parent', NULL, 'api', 'GET'),
 ('Get role permissions', '/api/v1/roles/:id/permissions', NULL, 'access_setting_parent', NULL, 'api', 'GET'),
 ('Add role permissions', '/api/v1/roles/:id/permissions', NULL, 'access_setting_parent', NULL, 'api', 'POST'),
-('Get role users', '/api/v1/roles/:id/users', NULL, 'access_setting_parent', NULL, 'api', 'GET')
+('Get role users', '/api/v1/roles/:id/users', NULL, 'access_setting_parent', NULL, 'api', 'GET');
 -- end access setting
-ON CONFLICT DO NOTHING;
+
+INSERT INTO sections(name) VALUES
+('A'), ('B'), ('C')
+ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO classes(name, sections) VALUES
+('Grade 1', 'A,B,C'),
+('Grade 2', 'A,B,C'),
+('Grade 3', 'A,B'),
+('Grade 4', 'A,B'),
+('Grade 5', 'A')
+ON CONFLICT (name) DO NOTHING;
 
 ALTER SEQUENCE leave_status_id_seq RESTART WITH 1;
 INSERT INTO leave_status (name) VALUES
 ('On Review'),
 ('Approved'),
 ('Cancelled');
+
+INSERT INTO leave_policies (name, is_active) VALUES 
+('Annual Leave', true), 
+('Sick Leave', true), 
+('Study Leave', true)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO departments (name) VALUES 
+('Mathematics'), 
+('Science'), 
+('English'), 
+('Social Studies'), 
+('Physical Education')
+ON CONFLICT DO NOTHING;
 
 ALTER SEQUENCE roles_id_seq RESTART WITH 1;
 INSERT INTO roles (name, is_editable)
