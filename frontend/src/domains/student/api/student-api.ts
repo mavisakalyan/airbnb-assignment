@@ -53,6 +53,13 @@ export const studentApi = api.injectEndpoints({
     }),
     getTeachers: builder.query<GetTeachers, void>({
       query: () => `/teachers`
+    }),
+    deleteStudent: builder.mutation<{ message: string }, number>({
+      query: (id) => ({
+        url: `/students/${id}`,
+        method: 'DELETE'
+      }),
+      invalidatesTags: [Tag.STUDENTS]
     })
   })
 });
