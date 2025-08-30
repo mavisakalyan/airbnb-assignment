@@ -15,6 +15,7 @@ export const useHandleMenuAction = () => {
   const [resendPwdSetupLink] = useResendPwdSetupLinkMutation();
   const [resetPwd] = useResetPwdMutation();
   const [handleNoticeStatus] = useHandleNoticeStatusMutation();
+  
 
   const handleAction = async (menuItemValue: string, selectedId: number) => {
     const actionHandlers: {
@@ -31,7 +32,8 @@ export const useHandleMenuAction = () => {
       APPROVE_NOTICE: () => handleNoticeStatus({ id: selectedId, status: 5 }).unwrap(),
       REJECT_NOTICE: () => handleNoticeStatus({ id: selectedId, status: 4 }).unwrap(),
       DELETE_NOTICE: () => handleNoticeStatus({ id: selectedId, status: 6 }).unwrap(),
-      DELETE_NOTICE_BY_SELF: () => handleNoticeStatus({ id: selectedId, status: 3 }).unwrap()
+      DELETE_NOTICE_BY_SELF: () => handleNoticeStatus({ id: selectedId, status: 3 }).unwrap(),
+      DELETE_STUDENT: () => handleStudentStatus({ id: selectedId, status: false }).unwrap()
     };
 
     if (actionHandlers[menuItemValue]) {
